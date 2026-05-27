@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Venture Capital Evaluator | EBRD & EC Expert</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  /* ═══════════════════════════════════════
+     CUSTOM CURSOR
+  ═══════════════════════════════════════ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { cursor: none; scroll-behavior: smooth; }
+
+  #cursor {
+    position: fixed; top: 0; left: 0; width: 28px; height: 28px;
+    border: 1.5px solid rgba(240,96,0,0.85);
+    border-radius: 50%; pointer-events: none; z-index: 99999;
+    transform: translate(-50%,-50%);
+    transition: width 400ms cubic-bezier(0.23,1,0.32,1),
+                height 400ms cubic-bezier(0.23,1,0.32,1),
+                filter 400ms cubic-bezier(0.23,1,0.32,1),
+                border-color 400ms cubic-bezier(0.23,1,0.32,1),
+                background 400ms cubic-bezier(0.23,1,0.32,1);
+  }
+  #cursor.hovering {
+    width: 56px; height: 56px;
+    filter: blur(2px);
+    border-color: rgba(200,0,74,0.7);
+    background: rgba(200,0,74,0.06);
+  }
+
+  /* ═══════════════════════════════════════
+     CSS VARIABLES
+  ═══════════════════════════════════════ */
+  :root {
+    --navy:   #2D2A6E;
+    --crimson:#CC0022;
+    --orange: #F06000;
+    --silver: #9AA5A8;
+    --pink:   #C8004A;
+    --white:  #F8F6F2;
+    --offwhite: #EDE9E3;
+    --dark:   #1A1825;
+    --text-main: #F8F6F2;
+    --text-muted: rgba(248,246,242,0.72);
+    --glass-bg: rgba(45,42,110,0.22);
+    --glass-border: rgba(248,246,242,0.10);
+    --shadow-color: rgba(26,24,37,0.55);
+    --easing: cubic-bezier(0.23,1,0.32,1);
+    --dur: 400ms;
+    --spacing-1: 8px;
+    --spacing-2: 16px;
+    --spacing-3: 24px;
+    --spacing-4: 32px;
+    --spacing-6: 48px;
+    --spacing-8: 64px;
+    --spacing-12: 96px;
+    --spacing-16: 128px;
+  }
+
+  /* ═══════════════════════════════════════
+     BASE
+  ═══════════════════════════════════════ */
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--dark);
+    color: var(--text-main);
+    line-height: 1.8;
+    font-weight: 300;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* GRAIN LAYER */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 9998;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.038'/%3E%3C/svg%3E");
+    background-size: 180px 180px;
+    opacity: 0.045;
+    animation: grainShift 7s steps(10) infinite;
+  }
+  @keyframes grainShift {
+    0%,100%{transform:translate(0,0)}
+    10%{transform:translate(-2%,-3%)}
+    20%{transform:translate(3%,1%)}
+    30%{transform:translate(-1%,4%)}
+    40%{transform:translate(2%,-2%)}
+    50%{transform:translate(-3%,3%)}
+    60%{transform:translate(1%,-1%)}
+    70%{transform:translate(3%,2%)}
+    80%{transform:translate(-2%,4%)}
+    90%{transform:translate(2%,-3%)}
+  }
+
+  /* ═══════════════════════════════════════
+     MULTI-LAYER SHADOWS MIXIN
+  ═══════════════════════════════════════ */
+  .shadow-deep {
+    box-shadow:
+      0 2px 4px rgba(26,24,37,0.10),
+      0 6px 12px rgba(26,24,37,0.14),
+      0 14px 28px rgba(26,24,37,0.18),
+      0 24px 48px rgba(26,24,37,0.22),
+      0 40px 72px rgba(26,24,37,0.28);
+  }
+  .shadow-card {
+    box-shadow:
+      0 1px 2px rgba(26,24,37,0.10),
+      0 4px 8px rgba(26,24,37,0.12),
+      0 10px 20px rgba(26,24,37,0.16),
+      0 18px 36px rgba(26,24,37,0.20),
+      0 32px 56px rgba(26,24,37,0.24);
+  }
+
+  /* ═══════════════════════════════════════
+     NAVIGATION
+  ═══════════════════════════════════════ */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    padding: var(--spacing-3) var(--spacing-8);
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(26,24,37,0.72);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border-bottom: 0.5px solid var(--glass-border);
+    box-shadow:
+      0 1px 2px rgba(26,24,37,0.10),
+      0 4px 12px rgba(26,24,37,0.18),
+      0 12px 32px rgba(26,24,37,0.22);
+    transition: background var(--dur) var(--easing);
+  }
+
+  .nav-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--white);
+    text-decoration: none;
+    display: flex; align-items: center; gap: var(--spacing-2);
+  }
+  .nav-logo span {
+    display: inline-block; width: 8px; height: 8px;
+    background: var(--orange); border-radius: 50%;
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100%{opacity:1;transform:scale(1)}
+    50%{opacity:0.5;transform:scale(0.7)}
+  }
+
+  .nav-links {
+    display: flex; gap: var(--spacing-4); list-style: none; align-items: center;
+  }
+  .nav-links a {
+    color: var(--text-muted); text-decoration: none;
+    font-size: 0.82rem; letter-spacing: 0.12em; text-transform: uppercase;
+    font-weight: 400;
+    transition: color var(--dur) var(--easing);
+    position: relative;
+  }
+  .nav-links a::after {
+    content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 0.5px;
+    background: var(--orange);
+    transition: width var(--dur) var(--easing);
+  }
+  .nav-links a:hover { color: var(--white); }
+  .nav-links a:hover::after { width: 100%; }
+
+  .nav-cta {
+    padding: var(--spacing-1) var(--spacing-3);
+    background: transparent;
+    border: 0.5px solid rgba(240,96,0,0.55);
+    color: var(--orange) !important;
+    border-radius: 2px;
+    font-size: 0.8rem !important;
+    letter-spacing: 0.14em !important;
+    text-transform: uppercase;
+    transition: background var(--dur) var(--easing), color var(--dur) var(--easing) !important;
+  }
+  .nav-cta:hover {
+    background: var(--orange) !important;
+    color: var(--dark) !important;
+  }
+  .nav-cta::after { display: none !important; }
+
+  .hamburger {
+    display: none; flex-direction: column; gap: 5px; cursor: pointer;
+    background: none; border: none; padding: var(--spacing-1);
+  }
+  .hamburger span {
+    display: block; width: 24px; height: 1px; background: var(--white);
+    transition: all var(--dur) var(--easing);
+  }
+
+  /* ═══════════════════════════════════════
+     HERO
+  ═══════════════════════════════════════ */
+  .hero {
+    min-height: 100vh;
+    display: grid; grid-template-columns: 1fr 1fr;
+    align-items: center;
+    padding: var(--spacing-16) var(--spacing-8) var(--spacing-12);
+    position: relative; overflow: hidden;
+    gap: var(--spacing-8);
+  }
+
+  /* Deep background orbs */
+  .hero::after {
+    content: '';
+    position: absolute; top: -20%; right: -10%;
+    width: clamp(400px, 60vw, 900px); height: clamp(400px, 60vw, 900px);
+    background: radial-gradient(ellipse at center,
+      rgba(45,42,110,0.45) 0%,
+      rgba(200,0,74,0.12) 45%,
+      transparent 70%);
+    border-radius: 50%; pointer-events: none; z-index: 0;
+    animation: floatOrb 12s ease-in-out infinite;
+  }
+  @keyframes floatOrb {
+    0%,100%{transform:translate(0,0) scale(1)}
+    50%{transform:translate(-3%,4%) scale(1.04)}
+  }
+
+  .hero-content { position: relative; z-index: 2; }
+
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: var(--spacing-2);
+    font-size: 0.75rem; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--orange); font-weight: 400;
+    margin-bottom: var(--spacing-4);
+    opacity: 0; transform: translateY(20px);
+    animation: slideUp 700ms var(--easing) 100ms forwards;
+  }
+  .hero-eyebrow::before {
+    content: ''; display: inline-block; width: 32px; height: 0.5px; background: var(--orange);
+  }
+
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.8rem, 5.5vw, 5.5rem);
+    font-weight: 300; line-height: 1.1;
+    color: var(--white);
+    margin-bottom: var(--spacing-4);
+    opacity: 0; transform: translateY(24px);
+    animation: slideUp 700ms var(--easing) 200ms forwards;
+  }
+  .hero-title em {
+    font-style: italic; color: var(--orange);
+  }
+  .hero-title .line-alt {
+    color: var(--silver);
+  }
+
+  .hero-subtitle {
+    font-size: clamp(0.95rem, 1.8vw, 1.12rem);
+    color: var(--text-muted); max-width: 480px;
+    margin-bottom: var(--spacing-6);
+    font-weight: 300;
+    opacity: 0; transform: translateY(24px);
+    animation: slideUp 700ms var(--easing) 300ms forwards;
+  }
+
+  .hero-actions {
+    display: flex; gap: var(--spacing-3); flex-wrap: wrap;
+    opacity: 0; transform: translateY(24px);
+    animation: slideUp 700ms var(--easing) 400ms forwards;
+  }
+
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-4);
+    background: var(--orange); color: var(--dark);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem; font-weight: 500;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    border: none; border-radius: 2px; text-decoration: none;
+    cursor: none;
+    box-shadow:
+      0 2px 4px rgba(240,96,0,0.14),
+      0 8px 20px rgba(240,96,0,0.22),
+      0 20px 48px rgba(240,96,0,0.18);
+    transition: all var(--dur) var(--easing);
+  }
+  .btn-primary:hover {
+    background: var(--crimson); color: var(--white);
+    transform: translateY(-2px);
+    box-shadow:
+      0 2px 4px rgba(204,0,34,0.14),
+      0 8px 20px rgba(204,0,34,0.26),
+      0 24px 56px rgba(204,0,34,0.20);
+  }
+
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-4);
+    background: transparent; color: var(--white);
+    font-size: 0.82rem; font-weight: 400;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    border: 0.5px solid rgba(248,246,242,0.25); border-radius: 2px;
+    text-decoration: none; cursor: none;
+    transition: all var(--dur) var(--easing);
+  }
+  .btn-ghost:hover {
+    border-color: rgba(248,246,242,0.6);
+    background: rgba(248,246,242,0.06);
+    transform: translateY(-2px);
+  }
+
+  @keyframes slideUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Hero right panel: stats */
+  .hero-visual {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column; gap: var(--spacing-4);
+    opacity: 0; transform: translateY(32px);
+    animation: slideUp 800ms var(--easing) 500ms forwards;
+  }
+
+  .stat-card {
+    background: var(--glass-bg);
+    border: 0.5px solid var(--glass-border);
+    border-radius: 4px;
+    padding: var(--spacing-4) var(--spacing-6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow:
+      0 1px 2px rgba(26,24,37,0.10),
+      0 4px 10px rgba(26,24,37,0.14),
+      0 12px 28px rgba(26,24,37,0.18),
+      0 24px 48px rgba(26,24,37,0.20),
+      0 40px 64px rgba(26,24,37,0.24);
+    transition: transform var(--dur) var(--easing), box-shadow var(--dur) var(--easing);
+  }
+  .stat-card:hover {
+    transform: translateX(-8px);
+    box-shadow:
+      0 1px 2px rgba(26,24,37,0.12),
+      0 6px 14px rgba(26,24,37,0.18),
+      0 16px 36px rgba(26,24,37,0.22),
+      0 32px 64px rgba(26,24,37,0.26),
+      0 56px 96px rgba(26,24,37,0.30);
+  }
+
+  .stat-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.4rem, 4vw, 3.8rem);
+    font-weight: 300; line-height: 1;
+    color: var(--white);
+  }
+  .stat-value span { color: var(--orange); font-style: italic; }
+  .stat-label {
+    font-size: 0.75rem; letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(248,246,242,0.80); margin-top: var(--spacing-1);
+  }
+  .stat-orgs {
+    display: flex; gap: var(--spacing-2); margin-top: var(--spacing-2); flex-wrap: wrap;
+  }
+  .org-badge {
+    font-size: 0.7rem; padding: 3px var(--spacing-2);
+    background: rgba(240,96,0,0.12);
+    border: 0.5px solid rgba(240,96,0,0.3);
+    border-radius: 1px; color: var(--orange); letter-spacing: 0.1em;
+  }
+
+  /* ═══════════════════════════════════════
+     SECTION LAYOUT
+  ═══════════════════════════════════════ */
+  section { padding: var(--spacing-12) var(--spacing-8); position: relative; }
+
+  .section-eyebrow {
+    display: inline-flex; align-items: center; gap: var(--spacing-2);
+    font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--orange); margin-bottom: var(--spacing-3);
+  }
+  .section-eyebrow::before {
+    content: ''; display: inline-block; width: 24px; height: 0.5px; background: var(--orange);
+  }
+
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 4vw, 3.6rem);
+    font-weight: 300; line-height: 1.15;
+    color: var(--white); margin-bottom: var(--spacing-4);
+  }
+  .section-title em { font-style: italic; color: var(--pink); }
+
+  .section-body {
+    font-size: clamp(0.9rem, 1.6vw, 1.05rem);
+    color: rgba(248,246,242,0.80); max-width: 560px; line-height: 1.85;
+  }
+
+  .divider {
+    height: 0.5px;
+    background: linear-gradient(90deg, transparent, rgba(248,246,242,0.1) 30%, rgba(240,96,0,0.3) 60%, transparent);
+    margin: 0 var(--spacing-8);
+  }
+
+  /* ═══════════════════════════════════════
+     SERVICES
+  ═══════════════════════════════════════ */
+  #services { background: rgba(45,42,110,0.08); }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+    gap: var(--spacing-4);
+    margin-top: var(--spacing-8);
+  }
+
+  .service-card {
+    background: rgba(26,24,37,0.55);
+    border: 0.5px solid rgba(248,246,242,0.08);
+    border-radius: 4px;
+    padding: var(--spacing-6);
+    position: relative; overflow: hidden;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow:
+      0 1px 2px rgba(26,24,37,0.10),
+      0 4px 10px rgba(26,24,37,0.12),
+      0 10px 24px rgba(26,24,37,0.16),
+      0 20px 40px rgba(26,24,37,0.20),
+      0 36px 64px rgba(26,24,37,0.24);
+    transition: transform var(--dur) var(--easing),
+                box-shadow var(--dur) var(--easing),
+                border-color var(--dur) var(--easing);
+    opacity: 0; transform: translateY(200px);
+  }
+  .service-card.visible { animation: cardReveal 700ms var(--easing) forwards; }
+  .service-card:nth-child(1) { animation-delay: 0ms; }
+  .service-card:nth-child(2) { animation-delay: 100ms; }
+  .service-card:nth-child(3) { animation-delay: 200ms; }
+  .service-card:nth-child(4) { animation-delay: 300ms; }
+  .service-card:nth-child(5) { animation-delay: 400ms; }
+  .service-card:nth-child(6) { animation-delay: 500ms; }
+
+  @keyframes cardReveal {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .service-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--orange), transparent);
+    opacity: 0;
+    transition: opacity var(--dur) var(--easing);
+  }
+  .service-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(240,96,0,0.22);
+    box-shadow:
+      0 2px 4px rgba(26,24,37,0.12),
+      0 8px 18px rgba(26,24,37,0.18),
+      0 20px 40px rgba(26,24,37,0.22),
+      0 36px 72px rgba(26,24,37,0.26),
+      0 64px 112px rgba(26,24,37,0.28);
+  }
+  .service-card:hover::before { opacity: 1; }
+
+  .service-icon {
+    width: 48px; height: 48px;
+    background: rgba(240,96,0,0.10);
+    border: 0.5px solid rgba(240,96,0,0.22);
+    border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: var(--spacing-4);
+    color: var(--orange);
+    transition: background var(--dur) var(--easing);
+  }
+  .service-card:hover .service-icon { background: rgba(240,96,0,0.18); }
+
+  .service-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.15rem, 2vw, 1.45rem);
+    font-weight: 400; color: var(--white);
+    margin-bottom: var(--spacing-2);
+  }
+  .service-desc {
+    font-size: 0.87rem; color: rgba(248,246,242,0.82); line-height: 1.75;
+  }
+  .service-tag {
+    display: inline-block; margin-top: var(--spacing-3);
+    font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--silver);
+    border-top: 0.5px solid rgba(154,165,168,0.2);
+    padding-top: var(--spacing-3);
+    width: 100%;
+  }
+
+  /* ═══════════════════════════════════════
+     ABOUT / EXPERTISE
+  ═══════════════════════════════════════ */
+  #about {
+    display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-12);
+    align-items: center;
+  }
+
+  .about-image-area {
+    position: relative;
+  }
+  .about-portrait {
+    width: 100%; aspect-ratio: 3/4;
+    background: linear-gradient(145deg,
+      rgba(45,42,110,0.5) 0%,
+      rgba(200,0,74,0.2) 50%,
+      rgba(26,24,37,0.8) 100%);
+    border: 0.5px solid rgba(248,246,242,0.1);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    box-shadow:
+      0 2px 4px rgba(26,24,37,0.12),
+      0 8px 20px rgba(26,24,37,0.18),
+      0 20px 48px rgba(26,24,37,0.22),
+      0 40px 80px rgba(26,24,37,0.26),
+      0 72px 128px rgba(26,24,37,0.28);
+  }
+  .about-portrait-inner {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3rem, 8vw, 6rem);
+    font-style: italic; color: rgba(248,246,242,0.08);
+    user-select: none;
+    text-align: center; line-height: 1;
+  }
+  .about-badge {
+    position: absolute; bottom: -var(--spacing-4); right: -var(--spacing-4);
+    background: var(--navy);
+    border: 0.5px solid rgba(240,96,0,0.3);
+    border-radius: 3px;
+    padding: var(--spacing-4);
+    box-shadow:
+      0 4px 10px rgba(26,24,37,0.18),
+      0 12px 28px rgba(26,24,37,0.22),
+      0 28px 56px rgba(26,24,37,0.24);
+    backdrop-filter: blur(12px);
+    bottom: var(--spacing-4); right: calc(-1 * var(--spacing-6));
+  }
+  .badge-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    font-weight: 300; color: var(--orange);
+    line-height: 1;
+  }
+  .badge-label {
+    font-size: 0.68rem; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--text-muted);
+  }
+
+  .timeline {
+    margin-top: var(--spacing-6);
+    display: flex; flex-direction: column; gap: 0;
+  }
+  .timeline-item {
+    display: grid; grid-template-columns: 80px 1fr;
+    gap: var(--spacing-4);
+    padding: var(--spacing-4) 0;
+    border-bottom: 0.5px solid rgba(248,246,242,0.07);
+    position: relative;
+  }
+  .timeline-item::before {
+    content: ''; position: absolute; left: 79px; top: 0; bottom: 0;
+    width: 0.5px; background: rgba(240,96,0,0.25);
+  }
+  .timeline-year {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.85rem; color: #F06000;
+    letter-spacing: 0.08em; padding-top: 2px; text-align: right;
+    padding-right: var(--spacing-3); font-weight: 400;
+  }
+  .timeline-org {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+    font-weight: 600; color: #F8F6F2;
+    margin-bottom: 5px; letter-spacing: 0.01em;
+  }
+  .timeline-role {
+    font-size: 0.82rem; color: rgba(248,246,242,0.85);
+    letter-spacing: 0.04em; font-weight: 400;
+  }
+
+  /* ═══════════════════════════════════════
+     PROCESS
+  ═══════════════════════════════════════ */
+  #process { background: rgba(45,42,110,0.06); }
+
+  .process-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-1); margin-top: var(--spacing-8);
+  }
+  .process-step {
+    padding: var(--spacing-6) var(--spacing-4);
+    border: 0.5px solid rgba(248,246,242,0.06);
+    position: relative; overflow: hidden;
+    transition: background var(--dur) var(--easing), border-color var(--dur) var(--easing);
+    opacity: 0; transform: translateY(200px);
+  }
+  .process-step.visible { animation: cardReveal 700ms var(--easing) forwards; }
+  .process-step:nth-child(1) { animation-delay: 0ms; }
+  .process-step:nth-child(2) { animation-delay: 100ms; }
+  .process-step:nth-child(3) { animation-delay: 200ms; }
+  .process-step:nth-child(4) { animation-delay: 300ms; }
+  .process-step:nth-child(5) { animation-delay: 400ms; }
+
+  .process-step:hover {
+    background: rgba(240,96,0,0.05);
+    border-color: rgba(240,96,0,0.15);
+  }
+  .step-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3rem, 5vw, 4.5rem);
+    font-weight: 300; color: rgba(248,246,242,0.05);
+    line-height: 1; margin-bottom: var(--spacing-3);
+    transition: color var(--dur) var(--easing);
+  }
+  .process-step:hover .step-num { color: rgba(240,96,0,0.12); }
+
+  .step-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.1rem, 2vw, 1.35rem);
+    font-weight: 400; color: var(--white);
+    margin-bottom: var(--spacing-2);
+  }
+  .step-desc { font-size: 0.84rem; color: rgba(248,246,242,0.82); line-height: 1.75; }
+
+  /* ═══════════════════════════════════════
+     CLIENTS / INSTITUTIONS
+  ═══════════════════════════════════════ */
+  #institutions { text-align: center; padding: var(--spacing-8) var(--spacing-8); }
+
+  .inst-strip {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: var(--spacing-3); margin-top: var(--spacing-6);
+  }
+  .inst-pill {
+    padding: var(--spacing-2) var(--spacing-4);
+    background: rgba(26,24,37,0.6);
+    border: 0.5px solid rgba(248,246,242,0.10);
+    border-radius: 2px;
+    font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--text-muted);
+    transition: all var(--dur) var(--easing);
+    backdrop-filter: blur(8px);
+  }
+  .inst-pill:hover {
+    border-color: rgba(240,96,0,0.35);
+    color: var(--orange);
+    background: rgba(240,96,0,0.06);
+  }
+
+  /* ═══════════════════════════════════════
+     CONTACT
+  ═══════════════════════════════════════ */
+  #contact {
+    background: var(--navy);
+    position: relative; overflow: hidden;
+  }
+  #contact::before {
+    content: '';
+    position: absolute; bottom: -30%; left: -15%;
+    width: 70vw; height: 70vw;
+    background: radial-gradient(ellipse at center,
+      rgba(200,0,74,0.14) 0%, transparent 65%);
+    border-radius: 50%; pointer-events: none;
+  }
+
+  .contact-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-12);
+    align-items: start; position: relative; z-index: 1;
+  }
+  .contact-form { display: flex; flex-direction: column; gap: var(--spacing-4); }
+
+  .form-group { display: flex; flex-direction: column; gap: var(--spacing-1); }
+  .form-group label {
+    font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .form-group input, .form-group textarea, .form-group select {
+    background: rgba(26,24,37,0.55);
+    border: 0.5px solid rgba(248,246,242,0.14);
+    border-radius: 2px;
+    padding: var(--spacing-2) var(--spacing-3);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; font-weight: 300;
+    outline: none; width: 100%;
+    transition: border-color var(--dur) var(--easing),
+                background var(--dur) var(--easing);
+  }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+    border-color: rgba(240,96,0,0.5);
+    background: rgba(26,24,37,0.75);
+  }
+  .form-group textarea { min-height: 128px; resize: vertical; }
+  .form-group select option { background: var(--dark); }
+
+  .contact-info { display: flex; flex-direction: column; gap: var(--spacing-6); }
+  .contact-detail {
+    display: flex; gap: var(--spacing-3); align-items: flex-start;
+  }
+  .contact-icon {
+    width: 40px; height: 40px; min-width: 40px;
+    background: rgba(240,96,0,0.10);
+    border: 0.5px solid rgba(240,96,0,0.22);
+    border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--orange);
+  }
+  .contact-detail-title {
+    font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 4px;
+  }
+  .contact-detail-value {
+    font-size: 0.95rem; color: var(--white);
+  }
+
+  /* ═══════════════════════════════════════
+     SITEMAP
+  ═══════════════════════════════════════ */
+  #sitemap {
+    background: rgba(26,24,37,0.96);
+    padding: var(--spacing-8);
+  }
+  .sitemap-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--spacing-6); margin-top: var(--spacing-6);
+  }
+  .sitemap-col h4 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem; font-weight: 400;
+    color: var(--white); margin-bottom: var(--spacing-3);
+    padding-bottom: var(--spacing-2);
+    border-bottom: 0.5px solid rgba(240,96,0,0.25);
+  }
+  .sitemap-col ul { list-style: none; display: flex; flex-direction: column; gap: var(--spacing-2); }
+  .sitemap-col ul li a {
+    font-size: 0.82rem; color: var(--text-muted); text-decoration: none;
+    letter-spacing: 0.06em;
+    transition: color var(--dur) var(--easing);
+    display: flex; align-items: center; gap: var(--spacing-1);
+  }
+  .sitemap-col ul li a::before {
+    content: '—'; font-size: 0.6rem; opacity: 0.4;
+  }
+  .sitemap-col ul li a:hover { color: var(--orange); }
+
+  /* ═══════════════════════════════════════
+     FOOTER
+  ═══════════════════════════════════════ */
+  footer {
+    background: var(--dark);
+    border-top: 0.5px solid rgba(248,246,242,0.06);
+    padding: var(--spacing-6) var(--spacing-8);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: var(--spacing-3);
+  }
+  .footer-left {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem; color: var(--text-muted);
+  }
+  .footer-left strong { color: var(--white); font-weight: 400; }
+  .footer-right {
+    font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(154,165,168,0.5);
+  }
+  .footer-right a { color: var(--silver); text-decoration: none; }
+  .footer-right a:hover { color: var(--orange); }
+
+  /* ═══════════════════════════════════════
+     MOBILE NAV DRAWER
+  ═══════════════════════════════════════ */
+  .mobile-menu {
+    display: none; position: fixed; inset: 0; z-index: 999;
+    background: rgba(26,24,37,0.97);
+    backdrop-filter: blur(24px);
+    flex-direction: column; align-items: center; justify-content: center;
+    gap: var(--spacing-6);
+    opacity: 0; pointer-events: none;
+    transition: opacity var(--dur) var(--easing);
+  }
+  .mobile-menu.open { display: flex; opacity: 1; pointer-events: all; }
+  .mobile-menu a {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.8rem, 6vw, 2.8rem);
+    font-weight: 300; color: var(--white);
+    text-decoration: none;
+    transition: color var(--dur) var(--easing);
+  }
+  .mobile-menu a:hover { color: var(--orange); }
+  .mobile-close {
+    position: absolute; top: var(--spacing-4); right: var(--spacing-4);
+    background: none; border: none; color: var(--white); font-size: 1.5rem;
+    cursor: none; padding: var(--spacing-2);
+  }
+
+  /* ═══════════════════════════════════════
+     RESPONSIVE
+  ═══════════════════════════════════════ */
+  @media (max-width: 900px) {
+    nav { padding: var(--spacing-2) var(--spacing-4); }
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+
+    .hero {
+      grid-template-columns: 1fr;
+      padding: calc(var(--spacing-16) - 24px) var(--spacing-4) var(--spacing-8);
+      gap: var(--spacing-6);
+    }
+    .hero-subtitle { max-width: 100%; }
+
+    #about {
+      grid-template-columns: 1fr;
+      padding: var(--spacing-8) var(--spacing-4);
+      gap: var(--spacing-6);
+    }
+    .about-badge { right: var(--spacing-2); }
+
+    section { padding: var(--spacing-8) var(--spacing-4); }
+
+    .contact-grid { grid-template-columns: 1fr; gap: var(--spacing-6); }
+
+    .divider { margin: 0 var(--spacing-4); }
+
+    footer { padding: var(--spacing-4); }
+    #sitemap { padding: var(--spacing-6) var(--spacing-4); }
+  }
+
+  @media (max-width: 560px) {
+    .hero-actions { flex-direction: column; }
+    .btn-primary, .btn-ghost { width: 100%; justify-content: center; }
+    .process-grid { grid-template-columns: 1fr; gap: 0; }
+    .process-step { border-bottom: 0.5px solid rgba(248,246,242,0.06); }
+  }
+
+  /* ═══════════════════════════════════════
+     SVG ICONS (inline lucide-style)
+  ═══════════════════════════════════════ */
+
+  /* ═══════════════════════════════════════
+     CASCADE FUNDS / FSTP LIST
+  ═══════════════════════════════════════ */
+  .funds-list {
+    display: flex; flex-direction: column; gap: 0;
+    margin-top: var(--spacing-4);
+  }
+
+  .fund-row {
+    display: grid; grid-template-columns: 72px 1fr;
+    gap: var(--spacing-3);
+    padding: var(--spacing-3) 0;
+    border-bottom: 0.5px solid rgba(248,246,242,0.07);
+    position: relative;
+    transition: background var(--dur) cubic-bezier(0.23,1,0.32,1);
+  }
+  .fund-row:hover {
+    background: rgba(240,96,0,0.04);
+    border-radius: 2px;
+  }
+  .fund-row::before {
+    content: '';
+    position: absolute; left: 71px; top: 0; bottom: 0;
+    width: 0.5px; background: rgba(240,96,0,0.20);
+  }
+
+  .fund-year {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.78rem; color: #F06000;
+    letter-spacing: 0.06em; text-align: right;
+    padding-right: var(--spacing-2);
+    padding-top: 3px; line-height: 1.4;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+
+  .fund-content { padding-left: var(--spacing-2); }
+
+  .fund-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(0.95rem, 1.6vw, 1.12rem);
+    font-weight: 600; color: #F8F6F2;
+    line-height: 1.3; margin-bottom: 4px;
+    letter-spacing: 0.01em;
+  }
+
+  .fund-meta {
+    font-size: 0.8rem; color: rgba(248,246,242,0.80);
+    line-height: 1.55; letter-spacing: 0.03em;
+    font-weight: 300;
+  }
+
+  .fund-tags {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    margin-top: 6px;
+  }
+
+  .ftag {
+    font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 2px 8px;
+    background: rgba(45,42,110,0.45);
+    border: 0.5px solid rgba(154,165,168,0.25);
+    border-radius: 1px; color: rgba(154,165,168,0.95);
+    font-weight: 400;
+  }
+
+  .fund-row:hover .fund-name { color: #ffffff; }
+  .fund-row:hover .ftag {
+    border-color: rgba(240,96,0,0.35);
+    color: rgba(240,96,0,0.9);
+    background: rgba(240,96,0,0.08);
+  }
+
+  .icon { display: inline-block; width: 20px; height: 20px; vertical-align: middle; }
+  .icon-sm { width: 16px; height: 16px; }
+  .icon-lg { width: 28px; height: 28px; }
+</style>
+</head>
+<body>
+
+<!-- CUSTOM CURSOR -->
+<div id="cursor"></div>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-close" id="mobileClose" onclick="closeMobile()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" width="28" height="28">
+      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </button>
+  <a href="#services" onclick="closeMobile()">Services</a>
+  <a href="#about" onclick="closeMobile()">Expertise</a>
+  <a href="#process" onclick="closeMobile()">Process</a>
+  <a href="#institutions" onclick="closeMobile()">Institutions</a>
+  <a href="#contact" onclick="closeMobile()">Contact</a>
+</div>
+
+<!-- NAVIGATION -->
+<nav>
+  <a class="nav-logo" href="#">
+    <span></span>
+    Venture Advisory
+  </a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#about">Expertise</a></li>
+    <li><a href="#process">Process</a></li>
+    <li><a href="#institutions">Institutions</a></li>
+    <li><a href="#contact" class="nav-cta">Contact</a></li>
+  </ul>
+  <button class="hamburger" onclick="openMobile()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero" id="home">
+  <div class="hero-content">
+    <div class="hero-eyebrow">Startup Evaluator & VC Strategist</div>
+    <h1 class="hero-title">
+      <em>Eight Years</em><br>
+      <span class="line-alt">of Shaping</span><br>
+      Venture Capital
+    </h1>
+    <p class="hero-subtitle">
+      Independent advisor and startup evaluator with deep institutional experience across EBRD, the European Commission, and leading venture funds. Turning complex investment decisions into clear strategic outcomes.
+    </p>
+    <div class="hero-actions">
+      <a href="#services" class="btn-primary">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        Explore Services
+      </a>
+      <a href="#contact" class="btn-ghost">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        Get in Touch
+      </a>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="stat-card">
+      <div class="stat-value">8<span>+</span></div>
+      <div class="stat-label">Years Full-Time VC Experience</div>
+      <div class="stat-orgs">
+        <span class="org-badge">EBRD</span>
+        <span class="org-badge">European Commission</span>
+        <span class="org-badge">Venture Funds</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">200<span>+</span></div>
+      <div class="stat-label">Startups Evaluated Across Europe</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">€<span>1.2B</span></div>
+      <div class="stat-label">Portfolio Value Advised</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ SERVICES ═══ -->
+<section id="services">
+  <div class="section-eyebrow">What I Offer</div>
+  <h2 class="section-title">Institutional-Grade<br><em>Advisory Services</em></h2>
+  <p class="section-body">Combining rigorous due diligence frameworks with direct experience from inside Europe's most influential financial institutions.</p>
+
+  <div class="services-grid">
+
+    <div class="service-card">
+      <div class="service-icon">
+        <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+      </div>
+      <div class="service-title">Startup Evaluation</div>
+      <div class="service-desc">Comprehensive assessment of startup viability using institutional frameworks — team, technology, market fit, traction, and scalability scored against international benchmarks.</div>
+      <div class="service-tag">Due Diligence · Scoring · Benchmarking</div>
+    </div>
+
+    <div class="service-card">
+      <div class="service-icon">
+        <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      </div>
+      <div class="service-title">Investment Readiness</div>
+      <div class="service-desc">Prepare founders and leadership teams to meet the standards of institutional investors, multilateral development banks, and strategic corporate funds.</div>
+      <div class="service-tag">Pitch Coaching · Fund Strategy · Storytelling</div>
+    </div>
+
+    <div class="service-card">
+      <div class="service-icon">
+        <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg>
+      </div>
+      <div class="service-title">Portfolio Management</div>
+      <div class="service-desc">Strategic portfolio oversight and monitoring — from KPI design and performance tracking to value-creation roadmaps and exit strategy development.</div>
+      <div class="service-tag">KPI Design · Value Creation · Exits</div>
+    </div>
+
+    <div class="service-card">
+      <div class="service-icon">
+        <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      </div>
+      <div class="service-title">EC & EBRD Grant Support</div>
+      <div class="service-desc">Guidance on European Commission and EBRD funding instruments — from Horizon Europe to InvestEU and EIC Accelerator applications and compliance.</div>
+      <div class="service-tag">Horizon Europe · EIC · InvestEU</div>
+    </div>
+
+    <div class="service-card">
+      <div class="service-icon">
+        <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div class="service-title">Fund Advisory</div>
+      <div class="service-desc">Strategic counsel for emerging and established venture funds — deal sourcing frameworks, LP relations, governance structures, and co-investment strategy.</div>
+      <div class="service-tag">LP Strategy · Deal Flow · Governance</div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ ABOUT ═══ -->
+<section id="about">
+  <!-- LEFT: Cascade Funds & FSTP Projects -->
+  <div>
+    <div class="section-eyebrow">Evaluated Programmes</div>
+    <h2 class="section-title">Cascade Funds<br>&amp; <em>FSTP Projects</em><br>2018 — 2026</h2>
+    <p class="section-body" style="margin-bottom: var(--spacing-6);">As an accredited expert evaluator, I have assessed startups and SMEs across Europe's most competitive cascade funding and FSTP instruments.</p>
+
+    <div class="funds-list">
+      <div class="fund-row">
+        <div class="fund-year">2018–20</div>
+        <div class="fund-content">
+          <div class="fund-name">STARTS4Water — Cascade Fund</div>
+          <div class="fund-meta">EIT Climate-KIC · 42 projects evaluated · Water innovation &amp; climate tech</div>
+          <div class="fund-tags"><span class="ftag">FSTP</span><span class="ftag">EIT</span></div>
+        </div>
+      </div>
+      <div class="fund-row">
+        <div class="fund-year">2019–21</div>
+        <div class="fund-content">
+          <div class="fund-name">NGI Atlantic — Open Call</div>
+          <div class="fund-meta">European Commission / NGI · Transatlantic internet innovation · 60+ proposals</div>
+          <div class="fund-tags"><span class="ftag">H2020</span><span class="ftag">Cascade</span></div>
+        </div>
+      </div>
+      <div class="fund-row">
+        <div class="fund-year">2020–22</div>
+        <div class="fund-content">
+          <div class="fund-name">EBRD Star Venture — Balkans</div>
+          <div class="fund-meta">EBRD Regional · Early-stage deeptech &amp; fintech · Albania, N. Macedonia, Serbia</div>
+          <div class="fund-tags"><span class="ftag">EBRD</span><span class="ftag">FSTP</span></div>
+        </div>
+      </div>
+      <div class="fund-row">
+        <div class="fund-year">2021–23</div>
+        <div class="fund-content">
+          <div class="fund-name">EIC Accelerator — Pilot Batch</div>
+          <div class="fund-meta">European Innovation Council · Blended finance · Deep tech SMEs across EU27</div>
+          <div class="fund-tags"><span class="ftag">EIC</span><span class="ftag">Horizon Europe</span></div>
+        </div>
+      </div>
+      <div class="fund-row">
+        <div class="fund-year">2022–23</div>
+        <div class="fund-content">
+          <div class="fund-name">DIH² Cascade Funding</div>
+          <div class="fund-meta">Digital Innovation Hubs / EC · Robotics &amp; AI manufacturing SMEs · 35 evaluations</div>
+          <div class="fund-tags"><span class="ftag">Cascade</span><span class="ftag">AI/Robotics</span></div>
+        </div>
+      </div>
+      <div class="fund-row">
+        <div class="fund-year">2023–24</div>
+        <div class="fund-content">
+          <div class="fund-name">Western Balkans Enterprise Development</div>
+          <div class="fund-meta">RCC / EC DG NEAR · Growth-stage startups · 6 WB economies</div>
+          <div class="fund-tags"><span class="ftag">DG NEAR</span><span class="ftag">FSTP</span></div>
+        </div>
+      </div>
+      <div class="fund-row">
+        <div class="fund-year">2024–26</div>
+        <div class="fund-content">
+          <div class="fund-name">InvestEU — Innovation Window</div>
+          <div class="fund-meta">EIF / EC · Equity &amp; quasi-equity evaluation · Cross-border VC mandates</div>
+          <div class="fund-tags"><span class="ftag">InvestEU</span><span class="ftag">EIF</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Timeline -->
+  <div>
+    <div class="section-eyebrow">The Expert</div>
+    <h2 class="section-title">Built on<br><em>Real Institutional</em><br>Experience</h2>
+    <p class="section-body">Eight years spent on the inside of institutions that shape European venture capital — not advising from the outside, but making the decisions. This is the difference.</p>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-year">2016–<br>2020</div>
+        <div>
+          <div class="timeline-org">European Bank for Reconstruction and Development</div>
+          <div class="timeline-role">Startup Evaluator &amp; Investment Analyst · EBRD Venture Initiative</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2018–<br>2022</div>
+        <div>
+          <div class="timeline-org">European Commission</div>
+          <div class="timeline-role">Expert Evaluator · Horizon 2020 / EIC Accelerator Program</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2020–<br>2024</div>
+        <div>
+          <div class="timeline-org">Pan-European Venture Funds</div>
+          <div class="timeline-role">Senior Advisor · Portfolio Strategy &amp; Deal Origination</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2024–<br>Now</div>
+        <div>
+          <div class="timeline-org">Independent Practice</div>
+          <div class="timeline-role">Startup Evaluator &amp; VC Strategist · Global Mandate</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ PROCESS ═══ -->
+<section id="process">
+  <div style="text-align:center; margin-bottom: var(--spacing-8);">
+    <div class="section-eyebrow" style="justify-content:center;">How I Work</div>
+    <h2 class="section-title">A Rigorous<br><em>Five-Stage</em> Process</h2>
+  </div>
+  <div class="process-grid">
+    <div class="process-step">
+      <div class="step-num">01</div>
+      <div class="step-title">Initial Briefing</div>
+      <div class="step-desc">Understanding your objectives, constraints, and the specific challenge — whether evaluation, fundraising, or strategic repositioning.</div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">02</div>
+      <div class="step-title">Deep Diligence</div>
+      <div class="step-desc">Applying institutional-grade scoring matrices to team, market, technology, traction and financial projections against validated benchmarks.</div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">03</div>
+      <div class="step-title">Competitive Mapping</div>
+      <div class="step-desc">Sector landscape analysis — identifying white spaces, competitive moats, and how the opportunity positions within European and global market structures.</div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">04</div>
+      <div class="step-title">Strategic Report</div>
+      <div class="step-desc">A board-ready document detailing findings, risk matrices, value drivers, and a prioritized set of recommendations with clear action ownership.</div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">05</div>
+      <div class="step-title">Ongoing Support</div>
+      <div class="step-desc">Optional ongoing advisory engagement: quarterly check-ins, investor introductions, pitch refinement, and milestone tracking through funding milestones.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ INSTITUTIONS ═══ -->
+<section id="institutions">
+  <div class="section-eyebrow" style="justify-content:center;">Institutional Footprint</div>
+  <h2 class="section-title" style="text-align:center;"><em>Trusted</em> by Leading<br>European Institutions</h2>
+  <div class="inst-strip">
+    <div class="inst-pill">EBRD</div>
+    <div class="inst-pill">European Commission</div>
+    <div class="inst-pill">EIC Accelerator</div>
+    <div class="inst-pill">Horizon Europe</div>
+    <div class="inst-pill">InvestEU</div>
+    <div class="inst-pill">EIF</div>
+    <div class="inst-pill">Startup Albania</div>
+    <div class="inst-pill">Western Balkans Fund</div>
+    <div class="inst-pill">SEE Venture Fund</div>
+    <div class="inst-pill">Cohesion Fund Partners</div>
+    <div class="inst-pill">COSME</div>
+    <div class="inst-pill">CEE Emerging VC</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ CONTACT ═══ -->
+<section id="contact">
+  <div class="contact-grid">
+    <div>
+      <div class="section-eyebrow">Get in Touch</div>
+      <h2 class="section-title">Start a<br><em>Conversation</em></h2>
+      <p class="section-body" style="margin-bottom: var(--spacing-6);">Whether you are a founder seeking evaluation, a fund building its process, or an institution requiring expert judgment — let us discuss what matters.</p>
+
+      <div class="contact-info">
+        <div class="contact-detail">
+          <div class="contact-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          </div>
+          <div>
+            <div class="contact-detail-title">Email</div>
+            <div class="contact-detail-value">advisory@ventureexpert.eu</div>
+          </div>
+        </div>
+        <div class="contact-detail">
+          <div class="contact-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div>
+            <div class="contact-detail-title">Location</div>
+            <div class="contact-detail-value">Brussels · Tirana · Remote</div>
+          </div>
+        </div>
+        <div class="contact-detail">
+          <div class="contact-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+          </div>
+          <div>
+            <div class="contact-detail-title">LinkedIn</div>
+            <div class="contact-detail-value">linkedin.com/in/ventureexpert</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="contact-form">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" placeholder="Your name">
+      </div>
+      <div class="form-group">
+        <label>Organisation / Fund</label>
+        <input type="text" placeholder="Company or institution">
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" placeholder="your@email.com">
+      </div>
+      <div class="form-group">
+        <label>Service of Interest</label>
+        <select>
+          <option value="">Select a service</option>
+          <option>Startup Evaluation</option>
+          <option>Investment Readiness</option>
+          <option>EC / EBRD Grant Support</option>
+          <option>Fund Advisory</option>
+          <option>Portfolio Management</option>
+          <option>Market Analysis</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Message</label>
+        <textarea placeholder="Describe your challenge or opportunity..."></textarea>
+      </div>
+      <button class="btn-primary" style="width:100%; justify-content:center; border:none;">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4 20-7z"/></svg>
+        Send Message
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SITEMAP ═══ -->
+<section id="sitemap" style="background: rgba(26,24,37,0.97); padding: var(--spacing-8);">
+  <div class="section-eyebrow">Site Navigation</div>
+  <h3 style="font-family: 'Cormorant Garamond', serif; font-size: clamp(1.4rem, 2.5vw, 2rem); font-weight: 300; color: var(--white); margin-bottom: var(--spacing-6);">Sitemap</h3>
+  <div class="sitemap-grid">
+    <div class="sitemap-col">
+      <h4>Main Pages</h4>
+      <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#about">About & Expertise</a></li>
+        <li><a href="#process">Process</a></li>
+        <li><a href="#institutions">Institutions</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+    <div class="sitemap-col">
+      <h4>Services</h4>
+      <ul>
+        <li><a href="#services">Startup Evaluation</a></li>
+        <li><a href="#services">Investment Readiness</a></li>
+        <li><a href="#services">Portfolio Management</a></li>
+        <li><a href="#services">EC & EBRD Grants</a></li>
+        <li><a href="#services">Fund Advisory</a></li>
+        <li><a href="#services">Market Analysis</a></li>
+      </ul>
+    </div>
+    <div class="sitemap-col">
+      <h4>Expertise</h4>
+      <ul>
+        <li><a href="#about">EBRD Experience</a></li>
+        <li><a href="#about">European Commission</a></li>
+        <li><a href="#about">Venture Funds</a></li>
+        <li><a href="#institutions">Institutional Partners</a></li>
+        <li><a href="#process">Methodology</a></li>
+      </ul>
+    </div>
+    <div class="sitemap-col">
+      <h4>Resources</h4>
+      <ul>
+        <li><a href="#contact">Book a Consultation</a></li>
+        <li><a href="#contact">Due Diligence Brief</a></li>
+        <li><a href="#contact">Newsletter</a></li>
+        <li><a href="#contact">Case Studies</a></li>
+      </ul>
+    </div>
+    <div class="sitemap-col">
+      <h4>Legal</h4>
+      <ul>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Service</a></li>
+        <li><a href="#">Cookie Policy</a></li>
+        <li><a href="#">Disclaimer</a></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">
+    <strong>Venture Advisory</strong> — Independent VC Expert
+  </div>
+  <div class="footer-right">
+    © 2025 · All rights reserved ·
+    <a href="#">Privacy</a> ·
+    <a href="#">Terms</a>
+  </div>
+</footer>
+
+<script>
+  /* ─── CURSOR ─── */
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+  });
+  document.querySelectorAll('a, button, input, textarea, select, .stat-card, .service-card').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
+  });
+
+  /* ─── MOBILE MENU ─── */
+  function openMobile() { document.getElementById('mobileMenu').classList.add('open'); }
+  function closeMobile() { document.getElementById('mobileMenu').classList.remove('open'); }
+
+  /* ─── INTERSECTION OBSERVER (stagger cards) ─── */
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.service-card, .process-step').forEach(el => observer.observe(el));
+
+  /* ─── NAV SCROLL EFFECT ─── */
+  window.addEventListener('scroll', () => {
+    const nav = document.querySelector('nav');
+    if (window.scrollY > 60) {
+      nav.style.background = 'rgba(26,24,37,0.94)';
+    } else {
+      nav.style.background = 'rgba(26,24,37,0.72)';
+    }
+  });
+
+  /* ─── HIDE CURSOR ON MOBILE ─── */
+  if (window.matchMedia('(max-width: 900px)').matches) {
+    cursor.style.display = 'none';
+    document.documentElement.style.cursor = 'auto';
+  }
+</script>
+</body>
+</html>
