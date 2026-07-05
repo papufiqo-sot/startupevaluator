@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
   <title>Venture Capital Evaluation & Institutional Intelligence Portal</title>
-  <link>https://yourdomain.com/</link>
+  <link>https://startupevaluator.scientiae-naturalis.org/</link>
   <description>Strategic updates on venture due diligence metrics, deep-tech evaluations, and multi-lateral bank frameworks (EBRD/EC).</description>
   <language>en-us</language>
   <lastBuildDate>Sun, 05 Jul 2026 16:50:00 +0100</lastBuildDate>
@@ -10,15 +10,15 @@
   
   <item>
     <title>Deep-Tech and Infrastructure Venture Evaluation Framework</title>
-    <link>https://yourdomain.com/#services</link>
-    <guid>https://yourdomain.com/#services-architecture</guid>
+    <link>https://startupevaluator.scientiae-naturalis.org/#services</link>
+    <guid>https://startupevaluator.scientiae-naturalis.org/#services-architecture</guid>
     <pubDate>Sun, 05 Jul 2026 12:00:00 +0100</pubDate>
     <description>Deployment of optimized validation methodologies for European Commission frameworks and private equity deal flows, targeting systemic scalability and risk containment.</description>
   </item>
 
   <item>
     <title>Systemic Due Diligence & Technical Audit Pipeline</title>
-    <link>https://yourdomain.com/#process</link>
+    <link>https://startupevaluator.scientiae-naturalis.org/#process</link>
     <guid>https://yourdomain.com/#process-pipeline</guid>
     <pubDate>Sun, 05 Jul 2026 12:00:00 +0100</pubDate>
     <description>An overview of our four-stage expert review pipeline: intake mapping, foundational validation, comprehensive technology vetting, and final investment readiness scoring.</description>
